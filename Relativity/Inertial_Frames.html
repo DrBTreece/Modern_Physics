@@ -1,0 +1,379 @@
+<html>
+<title>Inertial Reference Frames</title>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>MathJax example</title>
+  <script id="MathJax-script" async
+          src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js">
+  </script>
+  <h1>Inertial Reference Frames</h1>
+  <link type="text/css" href="/Modern_Physics/css/nav.css" rel="stylesheet" />
+</head>
+<style>
+    .flex-container {
+      /* We first create a flex layout context */
+      display: flex;
+      
+      /* Then we define the flow direction
+         and if we allow the items to wrap
+       * Remember this is the same as:
+       * flex-direction: row;
+       * flex-wrap: wrap;
+       */
+      flex-flow: row wrap;
+      
+      /* Then we define how is distributed the remaining space */
+      /*justify-content: space-around;*/
+      
+      padding: 0;
+      margin: 0;
+      list-style: none;
+    }
+    .slidecontainer {
+      width: 400px;
+      float: left;
+    }
+</style>
+<body>
+<!------------------>
+<!------------------>
+<!------------------>
+  <div id="nav_links" class="nav-bar">
+      <a href="/Modern_Physics/Relativity/Frames_Of_Reference.html"><span class="menu-next fas fa-chevron-left"></span><span class="nav_desktop_extra">Back</span></a>
+      <div class="nav-bar-link-spacer"></div>
+
+      <a href="/Modern_Physics/index.html" class="home"> Home</a>
+  </div>
+<!------------------>
+<!------------------>
+<!------------------>
+  <div class="vert-spacer"></div>
+  <div class="vert-spacer"></div>
+  <canvas id="Canvas1" width="800" height="600"></canvas>
+  <div class="vert-spacer"></div>
+  <div class="vert-spacer"></div>
+<ul class="flex-container">
+  <div class="slidecontainer">
+    <p>Background:</p>
+  <form>
+    <input type="radio" id="No_Bkgnd" name="Bkgnd" value="0" onclick="handleBkgnd(this);" checked="checked">
+    <label for="No_Bkgnd">Closed Environment</label><br>
+    <input type="radio" id="Yes_Bkgnd" name="Bkgnd" value="1" onclick="handleBkgnd(this);">
+    <label for="Yes_Bkgnd">See the World Around You</label>
+  </form>
+  </div>
+  <div class="slidecontainer">
+    <p>Frames of Reference:</p>
+  <form>
+    <input type="radio" id="No_Acc" name="Acc" value="0" onclick="handleAcc(this);" checked="checked">
+    <label for="No_Acc">Include Only Inertial Frames</label><br>
+    <input type="radio" id="Yes_Acc" name="Acc" value="1" onclick="handleAcc(this);">
+    <label for="Yes_Acc">Include a Non-Inertial Frame</label>
+  </form>
+  </div>
+ </ul>
+<!------------------>
+<!------------------>
+<!------------------>
+  <div id="nav_links" class="nav-bar">
+      <a href="/Modern_Physics/Relativity/Frames_Of_Reference.html"><span class="menu-next fas fa-chevron-left"></span><span class="nav_desktop_extra">Back</span></a>
+      <div class="nav-bar-link-spacer"></div>
+
+      <a href="/Modern_Physics/index.html" class="home"> Home</a>
+    </div>
+<!------------------>
+<!------------------>
+<!------------------>
+<!------------------>
+<!------------------>
+<!------------------>
+<!------------------>
+<script>
+    var Canvas;
+    var ctx;
+    var WIDTH;
+    var HEIGHT;
+
+    var t = 0;
+    var dt = 0.02;
+    var x = 0;
+    var v = 0;
+    var a = 0;
+
+
+    var Bkgnd = document.getElementsByName("Bkgnd");
+    var Bool_Bkgnd = false;
+    function handleBkgnd(Bkgnd) {
+        if(Bkgnd.value == "1") {
+            Bool_Bkgnd=true;
+        } else {
+            Bool_Bkgnd=false;
+        }
+    }
+
+    var Acc = document.getElementsByName("Acc");
+    var Bool_Acc = false;
+    function handleAcc(Acc) {
+        if(Acc.value == "1") {
+            Bool_Acc=true;
+        } else {
+            Bool_Acc=false;
+        }
+        Bool_Bkgnd = false;
+        Bkgnd[0].checked = true;
+        t = 0;
+        x = 0;
+        v = 0;
+        a = 0;
+    }
+
+
+
+
+
+    function draw_reference_black_bkgnd() {
+
+      ctx.beginPath();
+      ctx.rect(0, 0, WIDTH, HEIGHT);
+      ctx.fillStyle = "black";
+      ctx.fill();
+
+      ctx.clearRect(WIDTH/2 - 200, 50, 400, 200);
+      ctx.clearRect(WIDTH/2 - 200, 350, 400, 200);
+
+      ctx.beginPath();
+      ctx.moveTo(0, HEIGHT/2);
+      ctx.lineTo(WIDTH, HEIGHT/2);
+      ctx.strokeStyle = "white";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    }
+
+    function draw_reference_box_frame() {
+
+      ctx.clearRect(WIDTH/2 - 200, 50, 400, 200);
+      ctx.clearRect(WIDTH/2 - 200, 350, 400, 200);
+
+      ctx.beginPath();
+      ctx.rect(WIDTH/2 - 200, 50, 400, 200);
+      ctx.rect(WIDTH/2 - 200, 350, 400, 200);
+      ctx.strokeStyle = "black";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(0, HEIGHT/2);
+      ctx.lineTo(WIDTH, HEIGHT/2);
+      ctx.strokeStyle = "black";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    }
+
+
+    function draw_person(x,y, name){
+      ctx.beginPath();
+      ctx.arc(x, y, 15, 0, 2 * Math.PI);
+      ctx.strokeStyle = "black";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(x, y+15);
+      ctx.lineTo(x, y+60);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(x-15, y+40);
+      ctx.lineTo(x+15, y+40);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(x-15, y+90);
+      ctx.lineTo(x, y+60);
+      ctx.lineTo(x+15, y+90);
+      ctx.stroke();
+
+      ctx.font = "15px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "bottom";
+      ctx.fillText(name, x, y-18);
+    }
+    
+    
+    function draw_table(x,y){
+
+      ctx.beginPath();
+      ctx.moveTo(x-25, y);
+      ctx.lineTo(x+25, y);
+      ctx.strokeStyle = "black";
+      ctx.lineWidth = 6;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(x-15, y);
+      ctx.lineTo(x-15, y+40);
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(x+15, y);
+      ctx.lineTo(x+15, y+40);
+      ctx.stroke();
+
+    }
+    
+    
+    function draw_lamp(x,y,q){
+
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + 50*Math.sin(q), y + 50*Math.cos(q));
+      ctx.strokeStyle = "black";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(x + 70*Math.sin(q), y + 70*Math.cos(q), 20, -q, Math.PI - q, true);
+      ctx.lineTo(x + 70*Math.sin(q) + 20*Math.cos(q), y + 70*Math.cos(q) - 20*Math.sin(q));
+      ctx.stroke();
+    }
+
+    function draw_landscape(x, y) {
+ 
+      ctx.strokeStyle = "black";
+      ctx.fillStyle = "black";
+
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(WIDTH, y);
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.lineWidth = 15;
+
+      let arr = [45, 150, 325, 505, 605, 705];
+      for (let i = 0; i < arr.length; i++) {
+
+        ctx.beginPath();
+        ctx.arc((arr[i] + x)%WIDTH, y-60, 25, 0, 2 * Math.PI);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo((arr[i] + x)%WIDTH, y-40);
+        ctx.lineTo((arr[i] + x)%WIDTH, y);
+        ctx.stroke();
+
+      }
+
+    }
+
+
+
+
+
+
+
+
+
+    function acceleration(t) {
+      if (Bool_Acc) {
+        if (t < 2 ) {
+          return 0;
+        } else if (t < 4) {
+          return 50*(t-2);
+        } else if (t < 8) {
+          return 100;
+        } else if (t < 12) {
+          return 100-50*(t-8);
+        } else if (t < 16) {
+          return -100;
+        } else if (t < 18) {
+          return -100+50*(t-16);
+        } else {
+          return 0;
+        }
+      } else {
+        return 0;
+      }
+    }
+
+    function position(t) {
+      if (Bool_Acc) {
+        x += v*dt;
+        v += a*dt;
+ 
+      } else {
+        x += 300*dt;
+      }
+    }
+
+
+
+
+
+
+
+
+
+    function draw_scene(t) {
+    ctx.clearRect(0, 0, WIDTH, HEIGHT);
+    if(Bool_Bkgnd) {
+      draw_landscape(x, 225);
+      draw_landscape(0, 525);
+      draw_reference_box_frame();
+      draw_person(WIDTH/2 + 50, 160, "Bob");
+      draw_person(WIDTH/2 + 50, 460, "Kay");
+      draw_table(WIDTH/2 - 50, 210);
+      draw_table(WIDTH/2 - 50, 510);
+      draw_lamp(WIDTH/2 - 50, 50, a/200);
+      draw_lamp(WIDTH/2 - 50, 350, 0);
+    } else {
+      draw_reference_black_bkgnd();
+      draw_person(WIDTH/2 + 50, 160, "Bob");
+      draw_person(WIDTH/2 + 50, 460, "Kay");
+      draw_table(WIDTH/2 - 50, 210);
+      draw_table(WIDTH/2 - 50, 510);
+      draw_lamp(WIDTH/2 - 50, 50, a/200);
+      draw_lamp(WIDTH/2 - 50, 350, 0);
+    }
+  }
+  
+  function init() {
+    Canvas = document.getElementById("Canvas1");
+    ctx = Canvas.getContext( '2d' );
+    WIDTH = Canvas.width;
+    HEIGHT = Canvas.height;
+
+    draw_scene(0);
+  }
+  init();
+
+
+
+let lastTime = null;
+function frame(time) {
+  if (lastTime != null) {
+    updateAnimation(Math.min(100, time - lastTime) / 1000);
+  }
+  lastTime = time;
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+
+function updateAnimation(step) {
+  t += dt;
+  a = acceleration(t);
+  if (t > 20) {
+    t = 0;
+    v = 0;
+    a = 0;
+  }
+  position(t);
+  draw_scene(t);
+}
+
+</script>
+</body>
+</html>
