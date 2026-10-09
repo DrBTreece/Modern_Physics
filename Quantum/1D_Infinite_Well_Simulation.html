@@ -1,0 +1,354 @@
+<html>
+<title>One-Dimensional Particle In A Box</title>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <script id="MathJax-script" async
+          src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js">
+  </script>
+  <h1>One-Dimensional Particle In A Box</h1>
+  <link type="text/css" href="/Modern_Physics/css/nav.css" rel="stylesheet" />
+</head>
+<body>
+<!------------------>
+<!------------------>
+<!------------------>
+  <div id="nav_links" class="nav-bar">
+    <!--
+      <a href="/Modern_Physics/Relativity/Frames_Of_Reference.html"><span class="menu-next fas fa-chevron-left"></span><span class="nav_desktop_extra">Back</span></a>
+      <div class="nav-bar-link-spacer"></div>
+    -->
+
+      <a href="/Modern_Physics/index.html" class="home"> Home</a>
+  </div>
+<!------------------>
+<!------------------>
+<!------------------>
+  <div class="vert-spacer"></div>
+  <div class="vert-spacer"></div>
+  <canvas id="Canvas1" width="500" height="400"></canvas>
+  <div class="vert-spacer"></div>
+  <div class="vert-spacer"></div>
+  <button id="Start_Stop" onclick="Start_Stop()">Start</button>
+  <button id="Reset" onclick="Reset()">Reset Time</button>
+  <input type="checkbox" id="Show_Real" checked style="margin-left:20px;"/><label for="Show_Real" style="color:#3333FF;">Re(&Psi;)</label>
+  <input type="checkbox" id="Show_Imag" checked style="margin-left:20px;"/><label for="Show_Imag" style="color:#FF3333;">Im(&Psi;)</label>
+  <input type="checkbox" id="Show_Dens" unchecked style="margin-left:20px;"/><label for="Show_Dens" style="color:#FF33FF;">&Psi;<sup>*</sup>&Psi;</label>
+  <div class="vert-spacer"></div>
+  <div class="vert-spacer"></div>
+<!------------------>
+<!------------------>
+<!------------------>
+  <input type="range" id="L_Sli" min="0.1" max="20" value="5" step="0.1" />
+  <label for="L_Sli"> L = </label>
+  <input type="number" id="L_Num" min="0.1" max="20" value="5" step="0.1">
+  <div class="vert-spacer"></div>
+  <div class="vert-spacer"></div>
+<!------------------>
+<!------------------>
+<!------------------>
+  <table>
+    <caption>Superposition Weights</caption>
+    <thead>
+      <tr>
+        <th scope="col">n = </th>
+        <th scope="col">c<sub>n</sub> = </th>
+      </tr>
+      <tr>
+        <th scope=row>1</th>
+        <td><input type="number" id="a1" value="1" min="-5" max="5" step="0.01"> + &ImaginaryI; <input type="number" id="b1" value="0" min="-5" max="5" step="0.01"></td>
+      </tr>
+      <tr>
+        <th scope=row>2</th>
+        <td><input type="number" id="a2" value="0" min="-5" max="5" step="0.01"> + &ImaginaryI; <input type="number" id="b2" value="0" min="-5" max="5" step="0.01"></td>
+      </tr>
+      <tr>
+        <th scope=row>3</th>
+        <td><input type="number" id="a3" value="0" min="-5" max="5" step="0.01"> + &ImaginaryI; <input type="number" id="b3" value="0" min="-5" max="5" step="0.01"></td>
+      </tr>
+      <tr>
+        <th scope=row>4</th>
+        <td><input type="number" id="a4" value="0" min="-5" max="5" step="0.01"> + &ImaginaryI; <input type="number" id="b4" value="0" min="-5" max="5" step="0.01"></td>
+      </tr>
+      <tr>
+        <th scope=row>5</th>
+        <td><input type="number" id="a5" value="0" min="-5" max="5" step="0.01"> + &ImaginaryI; <input type="number" id="b5" value="0" min="-5" max="5" step="0.01"></td>
+      </tr>
+      <tr>
+        <th scope=row>6</th>
+        <td><input type="number" id="a6" value="0" min="-5" max="5" step="0.01"> + &ImaginaryI; <input type="number" id="b6" value="0" min="-5" max="5" step="0.01"></td>
+      </tr>
+    </thead>
+  </table>
+  <div class="vert-spacer"></div>
+  <button id="Normalize" onclick="Normalize()">Normalize</button>
+  <button id="Reset_Weights" onclick="Reset_Weights()">Reset Weights</button>
+  <div class="vert-spacer"></div>
+  <div class="vert-spacer"></div>
+<!------------------>
+<!------------------>
+<!------------------>
+  <div id="nav_links" class="nav-bar">
+    <!--
+      <a href="/Modern_Physics/Relativity/Frames_Of_Reference.html"><span class="menu-next fas fa-chevron-left"></span><span class="nav_desktop_extra">Back</span></a>
+      <div class="nav-bar-link-spacer"></div>
+    -->
+
+      <a href="/Modern_Physics/index.html" class="home"> Home</a>
+    </div>
+<!------------------>
+<!------------------>
+<!------------------>
+<!------------------>
+<!------------------>
+<!------------------>
+<!------------------>
+<script>
+  var Canvas;
+  var ctx;
+  var WIDTH;
+  var HEIGHT;
+
+  var Bool_Run = false;
+  var Bool_Real = true;
+  var Bool_Imag = true;
+  var Bool_Dens = false;
+
+  var t = 0;
+  var dt = 0.05;
+  var L = 5;
+  var m = 1;
+
+  var Start_Stop_Btn = document.getElementById("Start_Stop");
+  function Start_Stop() {
+    if (Bool_Run){
+      Start_Stop_Btn.innerHTML = "Start";
+    } else {
+      Start_Stop_Btn.innerHTML = "Stop";
+    }
+    Bool_Run = !Bool_Run;
+  }
+  var Reset_Btn = document.getElementById("Reset");
+  function Reset() {
+    Bool_Run = false;
+    Start_Stop_Btn.innerHTML = "Start";
+    t = 0;
+    draw_scene(t);
+  }
+
+  document.getElementById("Show_Real").addEventListener("input", (event) => {
+    Bool_Real = event.target.checked;
+    draw_scene(t);
+  });
+  document.getElementById("Show_Imag").addEventListener("input", (event) => {
+    Bool_Imag = event.target.checked;
+    draw_scene(t);
+  });
+  document.getElementById("Show_Dens").addEventListener("input", (event) => {
+    Bool_Dens = event.target.checked;
+    draw_scene(t);
+  });
+
+  var L_Sli = document.getElementById("L_Sli");
+  var L_Num = document.getElementById("L_Num");
+  L_Sli.addEventListener("input", (event) => {
+    L = L_Sli.value;
+    L_Num.value = L;
+    draw_scene(t);
+  });
+  L_Num.addEventListener("input", (event) => {
+    L = L_Num.value;
+    if (L > 20){L=20;}
+    if (L < 0.1){L=0.1;}
+    L_Sli.value = L;
+    draw_scene(t);
+  });
+
+
+
+  var a_title = ["a1", "a2", "a3", "a4", "a5", "a6"];
+  var a_input = {};
+  var a = new Array(a_title.length);
+  for (let i=0; i < a_title.length; i++){
+    a_input[a_title[i]] = document.getElementById(a_title[i]);
+    a[i] = a_input[a_title[i]].value;
+    a_input[a_title[i]].i = i;
+    a_input[a_title[i]].addEventListener("input", (event) => {
+      a[event.target.i] = event.target.value;
+    });
+  }
+
+
+  var b_title = ["b1", "b2", "b3", "b4", "b5", "b6"];
+  var b_input = {};
+  var b = new Array(b_title.length);
+  for (let i=0; i < b_title.length; i++){
+    b_input[b_title[i]] = document.getElementById(b_title[i]);
+    b[i] = b_input[b_title[i]].value;
+    b_input[b_title[i]].i = i;
+    b_input[b_title[i]].addEventListener("input", (event) => {
+      b[event.target.i] = event.target.value;
+    });
+  }
+
+
+  function Normalize() {
+    let Norm = 0;
+    for (let i = 0; i<a.length; i++) {
+      Norm += a[i]*a[i] + b[i]*b[i];
+    }
+    Norm = Math.sqrt(Norm);
+    for (let i = 0; i<a.length; i++) {
+      a[i] = a[i] / Norm;
+      a_input[a_title[i]].value = Math.round(1000*a[i])/1000;
+      b[i] = b[i] / Norm;
+      b_input[b_title[i]].value = Math.round(1000*b[i])/1000;
+    }
+  }
+  function Reset_Weights() {
+    for (let i = 0; i<a.length; i++) {
+      a[i] = 0;
+      a_input[a_title[i]].value = 0;
+      b[i] = 0;
+      b_input[b_title[i]].value = 0;
+    }
+    a[0] = 1;
+    a_input["a1"].value = 1;
+  }
+
+
+  function Stationary(x,n) {
+    return Math.sqrt(2/L)*Math.sin( n * Math.PI * x / L);
+  }
+  function E(n) {
+    return n*n*Math.PI*Math.PI / (2*m*L*L);
+  }
+  function Psi_Real(x,t) {
+    let res = 0;
+    for (let i=0; i<a.length; i++) {
+      res += (a[i]*Math.cos(E(i+1)*t) + b[i]*Math.sin(E(i+1)*t))*Stationary(x,i+1);
+    }
+    return res;
+  }
+  function Psi_Imag(x,t) {
+    let res = 0;
+    for (let i=0; i<a.length; i++) {
+      res += (b[i]*Math.cos(E(i+1)*t) - a[i]*Math.sin(E(i+1)*t))*Stationary(x,i+1);
+    }
+    return res;
+  }
+
+  function Prob_Dens(x,t) {
+    return Psi_Real(x,t)*Psi_Real(x,t) + Psi_Imag(x,t)*Psi_Imag(x,t);
+  }
+
+  function draw_well(L) {
+
+    ctx.beginPath();
+    ctx.rect(0, 0, 50, HEIGHT);
+    ctx.fillStyle = "#00000066";
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.rect(50 + 20*L, 0, WIDTH, HEIGHT);
+    ctx.fillStyle = "#00000066";
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(0, 0.5*HEIGHT);
+    ctx.lineTo(WIDTH, 0.5*HEIGHT);
+    ctx.strokeStyle="#000000";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(50, 0);
+    ctx.lineTo(50, HEIGHT);
+    ctx.strokeStyle="#000000";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  function draw_Real_Part(t) {
+    ctx.beginPath();
+    ctx.moveTo(0, 0.5*HEIGHT);
+    ctx.lineTo(50, 0.5*HEIGHT);
+    for (let i=0; i<=L; i+=0.1){
+      ctx.lineTo( 20*i + 50,  -60*Psi_Real(i, t) + 0.5*HEIGHT);
+    }
+    ctx.lineTo(50 + 20*L, 0.5*HEIGHT);
+    ctx.lineTo(WIDTH, 0.5*HEIGHT);
+    ctx.strokeStyle="#3333FF";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+
+  function draw_Imag_Part(t) {
+    ctx.beginPath();
+    ctx.moveTo(0, 0.5*HEIGHT);
+    ctx.lineTo(50, 0.5*HEIGHT);
+    for (let i=0; i<=L; i+=0.1){
+      ctx.lineTo( 20*i + 50,  -60*Psi_Imag(i, t) + 0.5*HEIGHT);
+    }
+    ctx.lineTo(50 + 20*L, 0.5*HEIGHT);
+    ctx.lineTo(WIDTH, 0.5*HEIGHT);
+    ctx.strokeStyle="#FF3333";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+
+  function draw_Prob_Dens(t) {
+    ctx.beginPath();
+    ctx.moveTo(0, 0.5*HEIGHT);
+    ctx.lineTo(50, 0.5*HEIGHT);
+    for (let i=0; i<=L; i+=0.1){
+      ctx.lineTo( 20*i + 50,  -60*Prob_Dens(i, t) + 0.5*HEIGHT);
+    }
+    ctx.lineTo(50 + 20*L, 0.5*HEIGHT);
+    ctx.lineTo(WIDTH, 0.5*HEIGHT);
+    ctx.strokeStyle="#FF33FF";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+
+  function draw_scene(t) {
+    ctx.clearRect(0, 0, WIDTH, HEIGHT);
+    draw_well(L);
+    if (Bool_Real) {draw_Real_Part(t)};
+    if (Bool_Imag) {draw_Imag_Part(t)};
+    if (Bool_Dens) {draw_Prob_Dens(t)};
+  }
+  
+  function init() {
+    Canvas = document.getElementById("Canvas1");
+    ctx = Canvas.getContext( '2d' );
+    WIDTH = Canvas.width;
+    HEIGHT = Canvas.height;
+
+    draw_scene(0);
+  }
+  init();
+
+
+let lastTime = null;
+function frame(time) {
+  if (lastTime != null) {
+    updateAnimation(Math.min(100, time - lastTime) / 1000);
+  }
+  lastTime = time;
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+
+function updateAnimation(step) {
+  if (Bool_Run){
+    t += dt;
+    //console.log(t,v,a);
+    draw_scene(t);
+  }
+}
+
+</script>
+</body>
+</html>
