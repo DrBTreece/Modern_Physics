@@ -274,7 +274,7 @@
     ctx.moveTo(0, 0.5*HEIGHT);
     ctx.lineTo(50, 0.5*HEIGHT);
     for (let i=0; i<=L; i+=0.1){
-      ctx.lineTo( 20*i + 50,  -60*Psi_Real(i, t) + 0.5*HEIGHT);
+      ctx.lineTo( 20*i + 50,  -120*Psi_Real(i, t) + 0.5*HEIGHT);
     }
     ctx.lineTo(50 + 20*L, 0.5*HEIGHT);
     ctx.lineTo(WIDTH, 0.5*HEIGHT);
@@ -288,7 +288,7 @@
     ctx.moveTo(0, 0.5*HEIGHT);
     ctx.lineTo(50, 0.5*HEIGHT);
     for (let i=0; i<=L; i+=0.1){
-      ctx.lineTo( 20*i + 50,  -60*Psi_Imag(i, t) + 0.5*HEIGHT);
+      ctx.lineTo( 20*i + 50,  -120*Psi_Imag(i, t) + 0.5*HEIGHT);
     }
     ctx.lineTo(50 + 20*L, 0.5*HEIGHT);
     ctx.lineTo(WIDTH, 0.5*HEIGHT);
@@ -302,7 +302,7 @@
     ctx.moveTo(0, 0.5*HEIGHT);
     ctx.lineTo(50, 0.5*HEIGHT);
     for (let i=0; i<=L; i+=0.1){
-      ctx.lineTo( 20*i + 50,  -60*Prob_Dens(i, t) + 0.5*HEIGHT);
+      ctx.lineTo( 20*i + 50,  -120*Prob_Dens(i, t) + 0.5*HEIGHT);
     }
     ctx.lineTo(50 + 20*L, 0.5*HEIGHT);
     ctx.lineTo(WIDTH, 0.5*HEIGHT);
