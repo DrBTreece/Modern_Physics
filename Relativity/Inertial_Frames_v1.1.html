@@ -1,0 +1,563 @@
+<html>
+<title>Inertial Reference Frames</title>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <script id="MathJax-script" async
+          src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js">
+  </script>
+  <h1>Inertial Reference Frames</h1>
+  <link type="text/css" href="/Modern_Physics/css/nav.css" rel="stylesheet" />
+</head>
+<style>
+    .flex-container {
+      /* We first create a flex layout context */
+      display: flex;
+      
+      /* Then we define the flow direction
+         and if we allow the items to wrap
+       * Remember this is the same as:
+       * flex-direction: row;
+       * flex-wrap: wrap;
+       */
+      flex-flow: row wrap;
+      
+      /* Then we define how is distributed the remaining space */
+      /*justify-content: space-around;*/
+      
+      padding: 0;
+      margin: 0;
+      list-style: none;
+    }
+    .slidecontainer {
+      width: 400px;
+      float: left;
+    }
+    .Attention_p {
+      color: #880000;
+      font-size: 15px;
+      min-height: 0.5cm;
+    }
+</style>
+<body>
+<!------------------>
+<!------------------>
+<!------------------>
+  <div id="nav_links" class="nav-bar">
+      <a href="/Modern_Physics/Relativity/Frames_Of_Reference.html"><span class="menu-next fas fa-chevron-left"></span><span class="nav_desktop_extra">Back</span></a>
+      <div class="nav-bar-link-spacer"></div>
+
+      <a href="/Modern_Physics/index.html" class="home"> Home</a>
+  </div>
+<!------------------>
+<!------------------>
+<!------------------>
+  <div class="vert-spacer"></div>
+  <div class="vert-spacer"></div>
+  <div>
+    <p id="Guidance"; class="Attention_p">An image will appear after you select a scenario.<br>This text will be replaced with statements or questions to consider.</p>
+  </div>
+<!------------------>
+<!------------------>
+<!------------------>
+  <div class="vert-spacer"></div>
+  <div class="vert-spacer"></div>
+  <canvas id="Canvas1" width="500" height="600"></canvas>
+  <div class="vert-spacer"></div>
+  <div class="vert-spacer"></div>
+  <p> Bob and Kay are riding in two trains, on different tracks. To start, both have their windows blinded.<br> Bob has just woken up and is trying to decide:
+    <br><br> Is he moving? <br> Is Kay moving? <br> Are they both moving?</p>
+  <p>Select a scenario, press the start button, and examine the world <b>from Bob's perspective</b>, both with/without open blinds.</p>
+  <form>
+    <label for="Scenario">Choose a scenario:</label>
+    <select name="Scenario" id="Scenario" onchange="Change_Scenario()">
+        <option style="display: none;"></option>
+        <option value=1>inertial</option>
+        <option value=2>non-inertial</option>
+    </select>
+  </form>
+  <button id="Start_Stop" onclick="Start_Stop()" disabled>---</button>
+  <button id="Blinds" onclick="Change_Blinds()" disabled>---</button>
+<!------------------>
+<!------------------>
+<!------------------>
+  <div id="nav_links" class="nav-bar">
+      <a href="/Modern_Physics/Relativity/Frames_Of_Reference.html"><span class="menu-next fas fa-chevron-left"></span><span class="nav_desktop_extra">Back</span></a>
+      <div class="nav-bar-link-spacer"></div>
+
+      <a href="/Modern_Physics/index.html" class="home"> Home</a>
+    </div>
+<!------------------>
+<!------------------>
+<!------------------>
+<!------------------>
+<!------------------>
+<!------------------>
+<!------------------>
+<script>
+    var Canvas;
+    var ctx;
+    var WIDTH;
+    var HEIGHT;
+
+    var t = 0;
+    var dt = 0.02;
+    var x = 0;
+    var v = 0;
+    var a = 0;
+
+    //var Acc = document.getElementsByName("Acc");
+    var Bool_Acc = false;
+    /*function handleAcc(Acc) {
+        if(Acc.value == "1") {
+            Bool_Acc=true;
+        } else {
+            Bool_Acc=false;
+        }
+        Bool_Bkgnd = false;
+        Bkgnd[0].checked = true;
+        t = 0;
+        x = 0;
+        v = 0;
+        a = 0;
+    }*/
+
+    const select = document.getElementById('Scenario');
+
+    var Bool_Run = false;
+    function Start_Stop() {
+      Bool_Run = !(Bool_Run);
+      if (Bool_Run) {
+        document.getElementById("Start_Stop").innerHTML="Stop";
+      }
+      if (!Bool_Run) {
+        document.getElementById("Start_Stop").innerHTML="Start";
+      }
+    }
+
+    var Bool_Blinds = true;
+    function Change_Blinds() {
+      let Guidance = document.getElementById("Guidance");
+      Bool_Blinds = !(Bool_Blinds);
+      if (Bool_Blinds) {
+        document.getElementById("Blinds").innerHTML="Open Blinds";
+        if (select.value === '1') {
+          Bool_Acc=false;
+          Guidance.innerHTML="How does Bob perceive Kay when you begin playing the scenario?";
+        }
+        else if (select.value === '2'){
+          Bool_Acc=true;
+          Guidance.innerHTML="Look carefully for subtle differences in how Kay moves, as compared to the inertial scenario. Look also inside the cars.";
+        }
+      }
+      if (!Bool_Blinds) {
+        document.getElementById("Blinds").innerHTML="Close Blinds";
+        if (select.value === '1') {
+          Bool_Acc=false;
+          Guidance.innerHTML="Look through <u>both</u> windows at the mountains; they are meant to represent the same mountain range.";
+        }
+        else if (select.value === '2'){
+          Bool_Acc=true;
+          Guidance.innerHTML="Look again at the mountains.";
+        }
+      }
+      draw_scene(t);
+    }
+
+
+
+
+
+    function clear_car(x, y) {
+
+      ctx.clearRect(x - 200, y - 100, 400, 200);
+
+    }
+
+    function draw_reference_box_frame() {
+
+      ctx.clearRect(WIDTH/2 - 200, 50, 400, 200);
+      ctx.clearRect(WIDTH/2 - 200, 350, 400, 200);
+
+      ctx.beginPath();
+      ctx.rect(WIDTH/2 - 200, 50, 400, 200);
+      ctx.rect(WIDTH/2 - 200, 350, 400, 200);
+      ctx.strokeStyle = "black";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(0, HEIGHT/2);
+      ctx.lineTo(WIDTH, HEIGHT/2);
+      ctx.strokeStyle = "black";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    }
+
+
+    function draw_person(x,y, name){
+      ctx.beginPath();
+      ctx.arc(x, y, 15, 0, 2 * Math.PI);
+      ctx.strokeStyle = "black";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(x, y+15);
+      ctx.lineTo(x, y+60);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(x-15, y+40);
+      ctx.lineTo(x+15, y+40);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(x-15, y+90);
+      ctx.lineTo(x, y+60);
+      ctx.lineTo(x+15, y+90);
+      ctx.stroke();
+
+      ctx.font = "15px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "bottom";
+      ctx.fillText(name, x, y-18);
+    }
+    
+    
+    function draw_table(x,y){
+
+      ctx.beginPath();
+      ctx.moveTo(x-25, y);
+      ctx.lineTo(x+25, y);
+      ctx.strokeStyle = "black";
+      ctx.lineWidth = 6;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(x-15, y);
+      ctx.lineTo(x-15, y+40);
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(x+15, y);
+      ctx.lineTo(x+15, y+40);
+      ctx.stroke();
+
+    }
+    
+    
+    function draw_lamp(x,y,q){
+
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + 50*Math.sin(q), y + 50*Math.cos(q));
+      ctx.strokeStyle = "black";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(x + 70*Math.sin(q), y + 70*Math.cos(q), 20, -q, Math.PI - q, true);
+      ctx.lineTo(x + 70*Math.sin(q) + 20*Math.cos(q), y + 70*Math.cos(q) - 20*Math.sin(q));
+      ctx.stroke();
+    }
+
+    function draw_closed_blinds(x,y){
+      ctx.beginPath();
+      ctx.moveTo(x - 75, y - 50);
+      ctx.lineTo(x + 75, y - 50);
+      ctx.lineTo(x + 75, y + 50);
+      ctx.lineTo(x - 75, y + 50);
+      ctx.lineTo(x - 75, y - 50);
+      ctx.fillStyle = "black";
+      ctx.fill();
+      ctx.strokeStyle="white";
+      ctx.lineWidth=2;
+      for (let i=-30; i<49; i+=20){
+        ctx.beginPath();
+        ctx.moveTo(x-75, y+i);
+        ctx.lineTo(x+75, y+i);
+        ctx.stroke();
+      }
+    }
+
+    function draw_open_blinds(x,y){
+      ctx.beginPath();
+      ctx.moveTo(x - 75, y - 50);
+      ctx.lineTo(x + 75, y - 50);
+      ctx.lineTo(x + 75, y + 50);
+      ctx.lineTo(x - 75, y + 50);
+      ctx.lineTo(x - 75, y - 50);
+      ctx.strokeStyle = "black";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    function draw_view(x,y ,xs){
+      ctx.beginPath();
+      ctx.moveTo(x - 75, y + 30);
+      ctx.lineTo(x + 75, y + 30);
+      ctx.strokeStyle = "black";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      let delX = (xs - x)%150;
+
+      // Where does the left margin start?
+
+      // Situation 1: Right slope of tall mountain
+      if (delX < 50) {
+        let yi = 0.8*delX;
+        ctx.beginPath();
+        ctx.moveTo(x - 75, y + 30 - yi);
+        ctx.lineTo(x - 75 + delX, y + 30);
+        ctx.lineTo(x - 50 + delX, y + 5);
+        ctx.lineTo(x - 25 + delX, y + 30);
+        ctx.lineTo(x + 25 + delX, y - 10);
+        ctx.lineTo(x + 75, y + 30 - yi);
+        ctx.lineTo(x + 75, y + 30);
+        ctx.lineTo(x - 75, y + 30);
+        ctx.lineTo(x - 75, y + 30 - yi);
+        ctx.fillStyle = "black";
+        ctx.fill();
+      }
+
+      // Situation 2: Left slope of tall mountain
+      if ((delX >=50) && (delX < 100)) {
+        let yi = 0.8*(100 - delX);
+        ctx.beginPath();
+        ctx.moveTo(x - 75, y + 30 - yi);
+        ctx.lineTo(x - 125 + delX, y - 10)
+        ctx.lineTo(x - 75 + delX, y + 30);
+        ctx.lineTo(x - 50 + delX, y + 5);
+        ctx.lineTo(x - 25 + delX, y + 30);
+        ctx.lineTo(x + 75, y + 30 - yi);
+        ctx.lineTo(x + 75, y + 30);
+        ctx.lineTo(x - 75, y + 30);
+        ctx.lineTo(x - 75, y + 30 - yi);
+        ctx.fillStyle = "black";
+        ctx.fill();
+      }
+
+      // Situation 3: Right slope of tall mountain
+      if ((delX >=100) && (delX < 125)) {
+        let yi = (delX-100);
+        ctx.beginPath();
+        ctx.moveTo(x - 75, y + 30 - yi);
+        ctx.lineTo(x - 175 + delX, y + 30);
+        ctx.lineTo(x - 125 + delX, y - 10);
+        ctx.lineTo(x - 75 + delX, y + 30);
+        ctx.lineTo(x - 50 + delX, y + 5);
+        ctx.lineTo(x - 25 + delX, y + 30);
+        ctx.lineTo(x + 75, y + 30 - yi);
+        ctx.lineTo(x + 75, y + 30);
+        ctx.lineTo(x - 75, y + 30);
+        ctx.lineTo(x - 75, y + 30 - yi);
+        ctx.fillStyle = "black";
+        ctx.fill();
+      }
+
+      // Situation 4: Left slope of tall mountain
+      if ((delX >=125) && (delX < 150)) {
+        let yi = (150-delX);
+        ctx.beginPath();
+        ctx.moveTo(x - 75, y + 30 - yi);
+        ctx.lineTo(x - 200 + delX, y + 5);
+        ctx.lineTo(x - 175 + delX, y + 30);
+        ctx.lineTo(x - 125 + delX, y - 10);
+        ctx.lineTo(x - 75 + delX, y + 30);
+        ctx.lineTo(x - 50 + delX, y + 5);
+//        ctx.lineTo(x - 25 + delX, y + 30);
+        ctx.lineTo(x + 75, y + 30 - yi);
+        ctx.lineTo(x + 75, y + 30);
+        ctx.lineTo(x - 75, y + 30);
+        ctx.lineTo(x - 75, y + 30 - yi);
+        ctx.fillStyle = "black";
+        ctx.fill();
+      }
+    }
+
+/*    function draw_landscape(x, y) {
+ 
+      ctx.strokeStyle = "black";
+      ctx.fillStyle = "black";
+
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(WIDTH, y);
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.lineWidth = 15;
+
+      let arr = [45, 150, 325, 505, 605, 705];
+      for (let i = 0; i < arr.length; i++) {
+
+        ctx.beginPath();
+        ctx.arc((arr[i] + x)%WIDTH, y-60, 25, 0, 2 * Math.PI);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo((arr[i] + x)%WIDTH, y-40);
+        ctx.lineTo((arr[i] + x)%WIDTH, y);
+        ctx.stroke();
+
+      }
+
+    }
+*/
+
+
+
+
+
+
+
+
+    function acceleration(t) {
+      if (Bool_Acc) {
+        if (t < 4 ) {
+          return 16*t;
+        } else if (t < 8) {
+          return 64-32*(t-4);
+        } else if (t < 12) {
+          return -64;
+        } else if (t < 16) {
+          return -64+32*(t-12);
+        } else if (t < 20) {
+          return 64 - 16*(t-16);
+        } else {
+          return 0;
+        }
+      } else {
+        return 0;
+      }
+    }
+
+    function position(t) {
+      if (Bool_Acc) {
+        x += v*dt;
+        v += a*dt;
+ 
+      } else {
+        x += 30*dt;
+      }
+    }
+
+
+
+
+
+
+
+
+
+  function draw_scene(t) {
+    ctx.clearRect(0, 0, WIDTH, HEIGHT);
+
+    ctx.beginPath();
+    ctx.rect(0, 0, WIDTH, HEIGHT);
+    ctx.fillStyle = "black";
+    ctx.fill();
+    
+    ctx.beginPath();
+    ctx.moveTo(0, HEIGHT/2);
+    ctx.lineTo(WIDTH, HEIGHT/2);
+    ctx.strokeStyle = "white";
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+
+    clear_car(WIDTH/2, 150);
+    clear_car(WIDTH/2 + x, 450);
+    draw_person(WIDTH/2 - 50, 160, "Bob");
+    draw_person(WIDTH/2 - 50 + x, 460, "Kay");
+    draw_table(WIDTH/2 - 150, 210);
+    draw_table(WIDTH/2 - 150 + x, 510);
+    draw_lamp(WIDTH/2 - 150, 50, a/200);
+    draw_lamp(WIDTH/2 - 150 + x, 350, 0);
+    if (Bool_Blinds) {
+      draw_closed_blinds(WIDTH/2 + 100, 150);
+      draw_closed_blinds(WIDTH/2 + 100 + x, 450);
+    } else {
+      draw_open_blinds(WIDTH/2 + 100, 150);
+      draw_view(WIDTH/2 + 100, 150, WIDTH/2 + 100 + x);
+      draw_open_blinds(WIDTH/2 + 100 + x, 450);
+      draw_view(WIDTH/2 + 100 + x, 450, WIDTH/2 + 100 + x);
+    }
+  }
+  
+  function init() {
+    Canvas = document.getElementById("Canvas1");
+    ctx = Canvas.getContext( '2d' );
+    WIDTH = Canvas.width;
+    HEIGHT = Canvas.height;
+
+    //draw_scene(0);
+  }
+  init();
+
+const Change_Scenario = () => {
+
+  let Guidance = document.getElementById("Guidance");
+  if (select.value === '1') {
+    Bool_Acc=false;
+    Guidance.innerHTML="How does Bob perceive Kay when you begin playing the scenario?";
+  }
+  else if (select.value === '2'){
+    Bool_Acc=true;
+    Guidance.innerHTML="Look carefully for subtle differences in how Kay moves, as compared to the inertial scenario. Look also inside the cars.";
+  }
+
+  let strt_stp_btn = document.getElementById("Start_Stop");
+  strt_stp_btn.disabled = false;
+  strt_stp_btn.innerHTML = "Start";
+  Bool_Run = false;
+
+  let blinds_btn = document.getElementById("Blinds");
+  blinds_btn.disabled = false;
+  blinds_btn.innerHTML = "Open Blinds";
+  Bool_Blinds = true;
+
+  
+  t=0;
+  x=0;
+  v=0;
+  a=0;
+  draw_scene(t);
+}
+
+
+
+let lastTime = null;
+function frame(time) {
+  if (lastTime != null) {
+    updateAnimation(Math.min(100, time - lastTime) / 1000);
+  }
+  lastTime = time;
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+
+function updateAnimation(step) {
+  if (Bool_Run){
+    t += dt;
+    a = acceleration(t);
+    if (t > 20) {
+      t = 0;
+      x = 0;
+      v = 0;
+      a = 0;
+      Start_Stop();
+    }
+    //console.log(t,v,a);
+    position(t);
+    draw_scene(t);
+  }
+}
+
+</script>
+</body>
+</html>
